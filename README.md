@@ -3,6 +3,7 @@ For the master thesis about aDNA from lake Victoria sediment.
 
 # Sequencing data
 Reference genomes were from microbial genome database such as GTDB and IMG/VR, used for mapping bacteria, virus and archaea. Raw paired-end reads sequencing was performed on Illumina HiSeq 4000 platform. Quality control of raw reads involved trimming, filtering, and merging using Fastp.
+
 Command for reference:
 ```bash
 # Trimming and merging reads with fastp
@@ -20,26 +21,19 @@ FASTQ format were mapped to the reference databases using Bowtie2.
 bowtie2 -x "$db_path" -k 1000 -D 15 -R 2 -N 1 -L 22 -i S,1,1.15 --np 1 --mp "1,1" \
             --rdg "0,1" --rfg "0,1" --score-min "L,0,-0.1" --no-unal -U "${fastq}.ppmR1.fq" -S "$bam_output"
 ```
-When mapping with Bowtie2, a maximum of 1000 valid alignments per read
-was allowed, sorted by alignment score. The upper limit on the number of seed
-extensions was set to 15, with re-seeding allowed twice, and the seed length was
-set to 22. No penalty was applied for seed-gap opening, and a penalty of 1
-was applied for gap extension for both the reads and the reference. A penalty
-of 1 was also applied for unknown or mismatched nucleotides. A lower score
-threshold was used for longer reads.
-Only aligned reads were written to the output SAM file. The SAM file was
-then converted to binary file (BAM) using Samtools[27] for faster indexing and
-reading, as well as to save storage space.
-The BAM files were very large, up to tens or even hundreds of thousands of
-megabytes. In this case, most BAM file headers were too large to permit merging
-all BAM files into a single dataset. The headers were minimized by deleting all
-entries that did not have associated mappings, using the Compressbam function
-from metaDMG. After simplifying the headers, all compressed BAM files for a
-11
-single sample were merged into one BAM file using Samtools.
-Specifically, microbial mapped reads were filtered out prior to eukaryotic
-mapping to reduce potential contamination and interference, thereby improving
-the accuracy and resolution of eukaryotic read assignment.
+
+BAM file headers then were minimized using the Compressbam function from metaDMG. 
+```bash
+metaDMG-cpp/misc/compressbam --input "$bam" --output "$(basename "$bam" .bam).comp.bam"
+```
+
+Sort and merge all compressed BAM files, and compress them again.
+```bash
+samtools sort -n -m 4G -o \$sorted_bam \$bam
+samtools merge -n -f '.comp.sam.gz' '.comp.bam.sorted.bam'
+metaDMG-cpp/misc/compressbam --threads 12 --input '.comp.sam.gz' --output '.comp.bam'
+```
+
 2.4 Alignment filtering
 The next step involved filtering each BAM file for every sample ID to detect
 reliable aligned reads. The first filter, filterBAM[28], was used to determine the
