@@ -1,5 +1,5 @@
 # Thesis_LakeVictoria
-For the master thesis about sedimentary DNA from lake Victoria. 
+For my Msc thesis on sedimentary DNA from lake Victoria. 
 
 # Sequencing data
 Reference genomes were from microbial genome database such as GTDB and IMG/VR, used for mapping bacteria, virus and archaea. Raw paired-end reads sequencing was performed on Illumina HiSeq 4000 platform. Quality control of raw reads involved trimming, filtering, and merging using Fastp.
