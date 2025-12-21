@@ -3,11 +3,14 @@ For the master thesis about aDNA from lake Victoria sediment.
 
 # Sequencing data
 Reference genomes were from microbial genome database such as GTDB and IMG/VR, used for mapping bacteria, virus and archaea. Raw paired-end reads sequencing was performed on Illumina HiSeq 4000 platform. Quality control of raw reads involved trimming, filtering, and merging using Fastp.
-
 Command for reference:
 ```bash
-fastp -i *R1*.fastq.gz -I *R2*.fastq.gz -m --merged_out '.ppm.fq' -V --detect_adapter_for_pe -D --dup_calc_accuracy 5 \     -g -x -q 30 -e 25 -l 30 -y -c -p -h '.fastp.report.html' -w 1
-
+# Trimming and merging reads with fastp
+fastp -i *R1*.fastq.gz -I *R2*.fastq.gz -m --merged_out '.ppm.fq' -V --detect_adapter_for_pe -D --dup_calc_accuracy 5 \
+      -g -x -q 30 -e 25 -l 30 -y -c -p -h '.fastp.report.html' -w 1
+# Removing duplicates with vsearch
+vsearch --fastx_uniques '.ppm.fq' --fastqout '.ppm.vs.fq' --minseqlength 30 --strand both
+```
 
 # Reads mapping
 FASTQ format were mapped to the reference databases using Bowtie2. When mapping with Bowtie2, a maximum of 1000 valid alignments per read
