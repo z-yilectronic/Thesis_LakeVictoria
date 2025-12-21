@@ -10,10 +10,17 @@ fastp -i *R1*.fastq.gz -I *R2*.fastq.gz -m --merged_out '.ppm.fq' -V --detect_ad
       -g -x -q 30 -e 25 -l 30 -y -c -p -h '.fastp.report.html' -w 1
 # Removing duplicates with vsearch
 vsearch --fastx_uniques '.ppm.fq' --fastqout '.ppm.vs.fq' --minseqlength 30 --strand both
+# Filtering low-complexity reads with SGA
+sga preprocess --dust-threshold=1 -m 30 '.ppm.vs.fq' -o '.ppm.vs.d1.fq'
 ```
 
 # Reads mapping
-FASTQ format were mapped to the reference databases using Bowtie2. When mapping with Bowtie2, a maximum of 1000 valid alignments per read
+FASTQ format were mapped to the reference databases using Bowtie2. 
+```bash
+bowtie2 -x "$db_path" -k 1000 -D 15 -R 2 -N 1 -L 22 -i S,1,1.15 --np 1 --mp "1,1" \
+            --rdg "0,1" --rfg "0,1" --score-min "L,0,-0.1" --no-unal -U "${fastq}.ppmR1.fq" -S "$bam_output"
+```
+When mapping with Bowtie2, a maximum of 1000 valid alignments per read
 was allowed, sorted by alignment score. The upper limit on the number of seed
 extensions was set to 15, with re-seeding allowed twice, and the seed length was
 set to 22. No penalty was applied for seed-gap opening, and a penalty of 1
