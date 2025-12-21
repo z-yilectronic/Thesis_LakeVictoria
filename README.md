@@ -1,5 +1,5 @@
 # Thesis_LakeVictoria
-For my Msc thesis on sedimentary DNA from lake Victoria. 
+For my Msc thesis on sedimentary DNA from Lake Victoria. 
 
 The commands are based on the ancient metagenomic analysis pipeline Holi(https://github.com/miwipe/Holi/tree/main/bin)
 
