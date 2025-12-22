@@ -60,14 +60,10 @@ metaDMG-cpp lca --threads 12 --bam "$sorted_bam" --nodes "$taxonomy_path/nodes.d
         --acc2tax "$taxonomy_path/acc2taxid.map.gz" --weight_type 1 --fix_ncbi 0 \
         --sim_score_low 0.6 --how_many 30 --out_prefix "$lca_prefix"
 ```
+For each read, 30 nucleotide positions from both the 5’ and 3’ ends were included in generated substitution matrices which serve for down
+stream damage pattern estimation.
 
-
-For each read, 30 nucleotide positions from both the 5’ and 3’ ends were
-included in generated substitution matrices. These matrices serves for down
-stream damage pattern estimation, enabling the assessment of characteristic
-nucleotide misincorporations associated with ancient DNA damage.
-12
-2.6 Damage estimate
+# Damage estimate
 The next step involves using the matrix of misincorporated bases to extract
 observed DNA deamination patterns (C to T substitutions on the forward strand
 and G to A substitutions on the reverse strand) and to estimate damage of
