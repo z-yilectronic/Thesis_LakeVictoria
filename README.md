@@ -1,5 +1,5 @@
-# Thesis_LakeVictoria
-For my Msc thesis on sedimentary DNA from Lake Victoria. 
+# Thesis_MetagenomicLakeVictoria
+For my Msc thesis on sedimentary DNA from Lake Victoria. Lake Victoria is a shallow tropical lake in Africa, having experienced desiccation and refilling before the modern lake finally formed over the past 15k years.
 
 The commands are based on the ancient metagenomic analysis pipeline Holi(https://github.com/miwipe/Holi/tree/main/bin)
 
@@ -37,37 +37,31 @@ metaDMG-cpp/misc/compressbam --input '.comp.sam.gz' --output '.comp.bam'
 ```
 
 # Alignment filtering
-The next step involved filtering each BAM to detect reliable aligned reads. 
+This step involved filtering each BAM to detect reliable aligned reads. Filter tool FilterBAM was used to determine the "best" alignments. 
 
-The first filter tool FilterBAM was used to determine the "best" alignments.
+Firstly reassign the multiple-aligned reads. (If there's no error but no reassign file is generated, consider adjust the ani and count threshold.)
+```bash
+filterBAM reassign --bam "$bam_output" -i 0 --min-read-ani 92 --min-read-count 3 -M 8G -o "$reassigned_bam"
+```
+
+Then filter the reassigned BAM and remember to sort them again.
+```bash
+filterBAM filter --bam "$reassigned_bam" -m 8G --stats "${filename}_stats.tsv.gz" --stats-filtered "${filename}_stats_filtered.tsv.gz" \
+        --min-read-ani 92 --min-read-count 100 --min-normalized-entropy 0.6 --min-normalized-gini 0.4 --min-breadth 0.01 --include-low-detection \
+        --bam-filtered "$filtered_bam"
+samtools sort -n -@ 12 -m 8G -o "$sorted_bam" "$filtered_bam"
+```
+
+# Taxon classification
+Taxonomic classification step used the tool metaDMG.
+MetaDMG-cpp lca module performs the lowest common ancestor (LCA) algorithm to assign reads to taxonomic groups. It provides a fast and flexible classification of DNA reads aligned against reference databases containing multiple organisms. (Classification was performed against a taxonomy. Taxon names and nodes were extracted from the taxdump files and supplemented with a dictionary mapping accession numbers to taxon IDs. 
+```bash
+metaDMG-cpp lca --threads 12 --bam "$sorted_bam" --nodes "$taxonomy_path/nodes.dmp" --names "$taxonomy_path/names.dmp" \
+        --acc2tax "$taxonomy_path/acc2taxid.map.gz" --weight_type 1 --fix_ncbi 0 \
+        --sim_score_low 0.6 --how_many 30 --out_prefix "$lca_prefix"
+```
 
 
-In the reassigning step, the EM algorithm of filterBAM was not used, which
-means filtering was performed directly at a threshold of 92% ANI (average
-nucleotide identity) and a minimum of 10 reads per aligned reference.
-Following the initial reassign, additional filtering thresholds were applied:
-minimum read ANI of 92%, minimum read count per reference of 100, minimum
-normalized entropy of 0.6 (normalized entropy of the read coverage distribution),
-minimum normalized Gini coefficient of 0.4 (normalized Gini coefficient of the
-read coverage distribution), and a minimum coverage breadth of 0.01.
-The output BAM files were sorted by read names. The filtering step in
-f
-ilterBAM also produced statistical outputs in TSV format for further analysis.
-2.5 Taxon classification
-Taxonomic classification step used the tool metaDMG[29].
-MetaDMG-cpp lca module performs the lowest common ancestor (LCA)
-algorithm to assign reads to taxonomic groups. LCA reassigns the reads by ex
-amining all references (after filtering) to which a read mapped and identifies the
-lowest shared taxonomic ancestor. It provides a fast and flexible classification of
-DNA reads aligned against reference databases containing multiple organisms.
-Classification was performed against NCBI taxonomy.
-Taxon names and nodes were extracted from the NCBI taxdump files and
-supplemented with a dictionary mapping accession numbers to taxon IDs. A
-minimum similarity score of 0.95 (i.e., ≥ 95% matching sites) was required for
-an alignment to be considered.
-Specifically, microbial mapped reads were filtered out prior to eukaryotic
-mapping to reduce potential contamination and interference, thereby improving
-the accuracy and resolution of eukaryotic read assignment.
 For each read, 30 nucleotide positions from both the 5’ and 3’ ends were
 included in generated substitution matrices. These matrices serves for down
 stream damage pattern estimation, enabling the assessment of characteristic
