@@ -31,15 +31,17 @@ metaDMG-cpp/misc/compressbam --input "$bam" --output "$(basename "$bam" .bam).co
 
 Sort and merge all compressed BAM files, and compress them again.
 ```bash
-samtools sort -n -m 4G -o \$sorted_bam \$bam
+samtools sort -n -m 4G -o $sorted_bam $bam
 samtools merge -n -f '.comp.sam.gz' '.comp.bam.sorted.bam'
-metaDMG-cpp/misc/compressbam --threads 12 --input '.comp.sam.gz' --output '.comp.bam'
+metaDMG-cpp/misc/compressbam --input '.comp.sam.gz' --output '.comp.bam'
 ```
 
-2.4 Alignment filtering
-The next step involved filtering each BAM file for every sample ID to detect
-reliable aligned reads. The first filter, filterBAM[28], was used to determine the
-best, or set of best, alignments.
+# Alignment filtering
+The next step involved filtering each BAM to detect reliable aligned reads. 
+
+The first filter tool FilterBAM was used to determine the "best" alignments.
+
+
 In the reassigning step, the EM algorithm of filterBAM was not used, which
 means filtering was performed directly at a threshold of 92% ANI (average
 nucleotide identity) and a minimum of 10 reads per aligned reference.
