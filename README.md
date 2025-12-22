@@ -1,4 +1,4 @@
-# Thesis_MetagenomicLakeVictoria
+# MetagenomicLakeVictoria
 For my Msc thesis on sedimentary DNA from Lake Victoria. Lake Victoria is a shallow tropical lake in Africa, having experienced desiccation and refilling before the modern lake finally formed over the past 15k years.
 
 The commands are based on the ancient metagenomic analysis pipeline Holi(https://github.com/miwipe/Holi/tree/main/bin)
