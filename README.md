@@ -54,7 +54,7 @@ samtools sort -n -@ 12 -m 8G -o "$sorted_bam" "$filtered_bam"
 
 # Taxon classification
 Taxonomic classification step used the tool metaDMG.
-MetaDMG-cpp lca module performs the lowest common ancestor (LCA) algorithm to assign reads to taxonomic groups. It provides a fast and flexible classification of DNA reads aligned against reference databases containing multiple organisms. (Classification was performed against a taxonomy. Taxon names and nodes were extracted from the taxdump files and supplemented with a dictionary mapping accession numbers to taxon IDs. 
+MetaDMG-cpp lca module performs the lowest common ancestor (LCA) algorithm to assign reads to taxonomic groups. It provides a fast and flexible classification of DNA reads aligned against reference databases containing multiple organisms. (Classification was performed against a taxonomy. Taxon names and nodes were extracted from the taxdump files and supplemented with a dictionary mapping accession numbers to taxon IDs.)
 ```bash
 metaDMG-cpp lca --threads 12 --bam "$sorted_bam" --nodes "$taxonomy_path/nodes.dmp" --names "$taxonomy_path/names.dmp" \
         --acc2tax "$taxonomy_path/acc2taxid.map.gz" --weight_type 1 --fix_ncbi 0 \
@@ -64,14 +64,18 @@ For each read, 30 nucleotide positions from both the 5’ and 3’ ends were inc
 stream damage pattern estimation.
 
 # Damage estimate
-The next step involves using the matrix of misincorporated bases to extract
-observed DNA deamination patterns (C to T substitutions on the forward strand
-and G to A substitutions on the reverse strand) and to estimate damage of
-nodes within LCA tree. metaDMG dfit performed numerical optimization of a
-deamination frequencies model based on the mismatch matrices. It estimates
-three key parameters of the DNA damage model: amplitude of damage at the
-f
-irst position(A), relative decrease in damage per position(q) and background
+The next step involves computing observed DNA deamination patterns (C -> T on forward strand, G -> A on reverse strand) and estimating damage of nodes within LCA tree, using the matrix of misincorporated bases.
+```bash
+# Damage fit calculation
+metaDMG-cpp dfit "$lca_prefix.bdamage.gz" --nodes "$taxonomy_path/nodes.dmp" --names "$taxonomy_path/names.dmp" \
+        --lib ds --nopt 10 --doboot 1 --nbootstrap 20 --showfits 2 --seed 25487 \
+        --out_prefix "$dfit_prefix"
+# Aggregate files of tree nodes, taxa names, lca statistics and damage
+metaDMG-cpp aggregate "$lca_prefix.bdamage.gz" --nodes "$taxonomy_path/nodes.dmp" --names "$taxonomy_path/names.dmp" --lcastat "$lca_prefix.stat.gz" --dfit "$dfit_prefix.dfit.gz" \
+        --out_prefix "$aggregate_prefix"
+```
+
+metaDMG dfit performed numerical optimization of a deamination frequencies model based on the mismatch matrices. It estimates three key parameters of the DNA damage model: amplitude of damage at the first position(A), relative decrease in damage per position(q) and background
 noise(c, equivalent to sequencing errors). A binomial distribution was used
 as the likelihood model, and 20 bootstrap iterations were performed to assess
 uncertainty. The number of optimization calls was 10.
