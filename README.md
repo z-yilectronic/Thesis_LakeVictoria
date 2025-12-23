@@ -54,6 +54,7 @@ samtools sort -n -@ 12 -m 8G -o "$sorted_bam" "$filtered_bam"
 
 # Taxon classification
 Taxonomic classification step used the tool metaDMG.
+
 MetaDMG-cpp lca module performs the lowest common ancestor (LCA) algorithm to assign reads to taxonomic groups. It provides a fast and flexible classification of DNA reads aligned against reference databases containing multiple organisms. (Classification was performed against a taxonomy. Taxon names and nodes were extracted from the taxdump files and supplemented with a dictionary mapping accession numbers to taxon IDs.)
 ```bash
 metaDMG-cpp lca --threads 12 --bam "$sorted_bam" --nodes "$taxonomy_path/nodes.dmp" --names "$taxonomy_path/names.dmp" \
@@ -74,23 +75,7 @@ metaDMG-cpp dfit "$lca_prefix.bdamage.gz" --nodes "$taxonomy_path/nodes.dmp" --n
 metaDMG-cpp aggregate "$lca_prefix.bdamage.gz" --nodes "$taxonomy_path/nodes.dmp" --names "$taxonomy_path/names.dmp" --lcastat "$lca_prefix.stat.gz" --dfit "$dfit_prefix.dfit.gz" \
         --out_prefix "$aggregate_prefix"
 ```
+metaDMG dfit performed numerical optimization of a deamination frequencies model based on the mismatch matrices. It estimates three key parameters of the DNA damage model: amplitude of damage at the first position(A), relative decrease in damage per position(q) and background noise(c, equivalent to sequencing errors). 
 
-metaDMG dfit performed numerical optimization of a deamination frequencies model based on the mismatch matrices. It estimates three key parameters of the DNA damage model: amplitude of damage at the first position(A), relative decrease in damage per position(q) and background
-noise(c, equivalent to sequencing errors). A binomial distribution was used
-as the likelihood model, and 20 bootstrap iterations were performed to assess
-uncertainty. The number of optimization calls was 10.
-Following the calculations, the LCA classification table and corresponding
-damage model fit (dfit) statistics were merged.
-2.7 aDNA authenication
-MetaDMGanalysis outputs a particular damage model for each sample, with
-deamination frequencies and associated confidence intervals for 30 nucleotide
-positions on both the forward and reverse strands.
-To assess ancient state, the concordance correlation coefficient (CCC) was
-calculated to evaluate the agreement between the damage model and the ob
-served nucleotide misincorporation patterns in each classified taxon. The fit, as
-reflected by the coefficient, was used to determine whether the taxa (identified
-through the mapping, filtering, and classification steps mentioned above) ex
-hibit ancient DNA damage patterns. It separated modern taxa inhabiting the
-sediment layers and support the interpretation of ancient DNA sources. Ancient
-taxa were identified and authenticated based on DNA damage patterns using
-the Briggs damage model[30].
+# aDNA authenication
+MetaDMG analysis outputs a particular Briggs damage model for each sample, with deamination frequencies and associated confidence intervals for 30 nucleotide positions on both the forward and reverse strands. To assess ancient state, the concordance correlation coefficient (CCC) was calculated to evaluate the agreement between the damage model and the observed nucleotide misincorporation patterns in each classified taxon, such telling whether the taxa (identified through the mapping, filtering, and classification steps mentioned above) exhibit ancient DNA damage patterns.
