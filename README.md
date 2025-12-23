@@ -80,4 +80,4 @@ metaDMG dfit performed numerical optimization of a deamination frequencies model
 # aDNA authenication
 MetaDMG analysis outputs a particular Briggs damage model for each sample, with deamination frequencies and associated confidence intervals for 30 nucleotide positions on both the forward and reverse strands. 
 
-To assess ancient state, the concordance correlation coefficient (CCC) was calculated to evaluate the agreement between the damage model and the observed nucleotide misincorporation patterns in each classified taxon.
+To assess ancient state, the concordance correlation coefficient (CCC) was calculated to evaluate the agreement between the damage model and the observed nucleotide misincorporation patterns in each species.
